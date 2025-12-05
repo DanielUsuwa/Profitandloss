@@ -1,71 +1,60 @@
-# Sentiment vs Sales — Profitandloss
+# SENTITMENT
 
-This Streamlit app performs sentiment analysis on textual feedback (reviews, tweets, comments) and analyzes the impact of sentiment on sales (units sold, revenue). It computes sentiment scores using NLTK VADER, categorizes sentiment, and shows aggregated stats, plots, correlation, and a simple linear regression.
+Streamlit app for sentiment analysis and evaluating the impact of discount on profit.
 
-## Files added
-- app.py — Streamlit application
-- requirements.txt — Python dependencies
-- .gitignore — common ignored files
+## What this does
+- Lets you upload a CSV/XLSX dataset containing text (e.g., reviews), discount and profit columns.
+- Computes VADER sentiment scores (compound) and assigns sentiment labels (positive/neutral/negative).
+- Shows sentiment distribution and scatter plots (discount vs profit).
+- Runs an OLS regression using `statsmodels`: profit ~ discount + sentiment_compound.
+- Allows downloading the processed dataset with sentiment scores.
 
-## Dataset format
-Your CSV should contain at least:
-- A text column with customer feedback (default column name: `text`)
-- A numeric sales column (units sold, revenue) (default column name: `sales`)
+## Quick start (local)
+1. Clone your repository (or add these files to your repo):
+   - `app.py`
+   - `requirements.txt`
+   - `.gitignore`
+2. Create a virtual environment (recommended) and install dependencies:
 
-The app attempts to parse numbers with commas and common currency symbols (e.g. "$1,200.50"). Example:
+```bash
+python -m venv .venv
+source .venv/bin/activate   # macOS / Linux
+.venv\Scripts\activate      # Windows
+pip install -r requirements.txt
+```
 
-text,sales
-"This product is amazing!",1200
-"Terrible quality",450
+> Note: As requested, `statsmodels` is included in `requirements.txt`. If you install packages individually, run:
+>
+> pip install statsmodels
 
-If your column names differ, provide their names in the sidebar inputs once you upload your CSV.
+3. Run the app:
 
-## Features
-- VADER sentiment compound score per text
-- Sentiment label: positive / neutral / negative (VADER thresholds)
-- Distribution pie chart for sentiment
-- Boxplot of sales by sentiment category
-- Scatter of sentiment score vs sales with OLS trendline
-- Pearson correlation and linear regression (slope, intercept, R²)
-- Download augmented CSV with `sentiment_compound`, `sentiment_label`, and `sales_numeric`
+```bash
+streamlit run app.py
+```
 
-## How to run locally
-1. Clone your repository (or place these files in your project folder)
-2. Create a virtual environment (recommended)
-   - python -m venv .venv
-   - source .venv/bin/activate (macOS/Linux) or .venv\Scripts\activate (Windows)
-3. Install dependencies:
-   - pip install -r requirements.txt
-4. Run Streamlit:
-   - streamlit run app.py
-5. Open the local URL shown by Streamlit (usually http://localhost:8501)
+4. Upload your dataset in the app and select the appropriate columns.
 
-## Deploy to Streamlit Cloud
-1. Push your repository to GitHub.
-2. On https://share.streamlit.io, sign in and click "New app".
-3. Select the repository (`owner/repo`), branch, and `app.py` as the entrypoint.
-4. Deploy — Streamlit Cloud will install the dependencies in `requirements.txt`.
+## Deployment
+- To deploy on Streamlit Community Cloud, push this repo to GitHub and link the repo in Streamlit Cloud. The `requirements.txt` will be used to install dependencies.
+- If deploying elsewhere, ensure `streamlit` and `statsmodels` are installed.
 
-Notes:
-- Streamlit Cloud has limited compute. VADER is lightweight and recommended for Streamlit hosting.
-- For larger transformer models (Hugging Face) prefer deploying to a VM, cloud function, or a paid resource.
+## Expected input
+- Text column: any text (strings) to analyze sentiment.
+- Discount column: numeric or percent strings like `10%`, `10` or `0.1`. The app does basic cleaning (strips `%` and commas).
+- Profit column: numeric values.
 
-## Want transformer-based sentiment?
-If you want higher quality (context-aware) sentiment using transformer models (BERT/RoBERTa), I can:
-- Add an option to use Hugging Face transformers (requires `transformers`, and likely `torch` or `tensorflow`)
-- Provide instructions to host a model on Hugging Face Inference API or use a lighter distil model
-- Add caching so predictions reuse results and reduce latency
+## Notes & next steps
+- The app uses VADER (`vaderSentiment`) which is tuned for social media / short texts. For deeper or domain-specific sentiment, consider fine-tuned transformer models.
+- The regression is OLS and is simple; you may want to:
+  - Add more controls (category, seasonality, product features).
+  - Use log-transformations if profit is skewed.
+  - Check heteroskedasticity and other diagnostic tests (statsmodels has tools).
+  - Add interaction terms (discount * sentiment_compound) to test if discounts modify the sentiment effect on profit.
+- If you want, I can add:
+  - Example dataset and unit tests
+  - An option to include interaction terms in the regression
+  - A cached streaming pipeline for larger datasets
 
-## Troubleshooting
-- If you see NLTK errors on first run, the app attempts to download the VADER lexicon. Ensure the server has internet access.
-- If sales values are not being parsed correctly, ensure your CSV uses a standard numeric format or remove stray text from the sales column.
-
-## Next improvements (optional)
-- Use a finetuned classification/regression model to predict sales uplift from text.
-- Time-series analysis if you include a date column (aggregate sentiment per day vs daily sales).
-- Add more visualizations and statistical tests (ANOVA, causality checks).
-
-If you'd like, I can:
-- Swap VADER for a transformer-based model
-- Add a notebook for model training on your historical data
-- Add CI and streamlit config for automatic deploys
+## Contact / Support
+If you want customizations (different sentiment model, pre-processing for multi-language text, or automated dashboards), tell me how your dataset looks (sample columns and a few rows) and I will adapt the app accordingly.
